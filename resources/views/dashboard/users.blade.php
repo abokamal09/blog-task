@@ -7,11 +7,11 @@
 
 <div class="stats-grid">
     <div class="stat-card">
-        <div class="stat-number">1,240</div>
+        <div class="stat-number">{{ $totalUsers }}</div>
         <div class="stat-label">Total Users</div>
     </div>
     <div class="stat-card" style="border-top-color: var(--accent-color);">
-        <div class="stat-number">5</div>
+        <div class="stat-number">{{ $adminCount }}</div>
         <div class="stat-label">Admins</div>
     </div>
 </div>
@@ -29,27 +29,28 @@
             </tr>
         </thead>
         <tbody>
+            @foreach($users as $user)
             <tr>
-                <td>#101</td>
-                <td><strong>Ahmed Kamal</strong></td>
-                <td>ahmed@example.com</td>
-                <td><span class="badge badge-admin">Admin</span></td>
-                <td>Oct 24, 2023</td>
+                <td>{{ $user->id }}</td>
+                <td><strong>{{ $user->name }}</strong></td>
+                <td>{{ $user->email }}</td>
+                <td><span class="badge badge-admin">
+                        @if( $user->is_admin )
+                        Admin
+                        @else
+                        Reader
+                        @endif
+                    </span></td>
+                <td>{{ $user->created_at }}</td>
                 <td>
-                    <a href="#" onclick="openModal('editUserModal')" class="btn btn-outline btn-sm">Edit</a>
+                    <a href="#" onclick="openEditUserModal(this)"
+                        data-id="{{ $user->id }}"
+                        data-name="{{ e($user->name) }}"
+                        data-email="{{ e($user->email) }}"
+                        data-role="{{ $user->is_admin ? 'admin' : 'user' }}" class="btn btn-outline btn-sm">Edit</a>
                 </td>
             </tr>
-            <tr>
-                <td>#102</td>
-                <td>John Doe</td>
-                <td>john@example.com</td>
-                <td><span class="badge badge-user">Reader</span></td>
-                <td>Nov 01, 2023</td>
-                <td>
-                    <a href="#" onclick="openModal('editUserModal')" class="btn btn-outline btn-sm">Edit</a>
-                    <button class="btn btn-danger btn-sm">Ban</button>
-                </td>
-            </tr>
+            @endforeach
         </tbody>
     </table>
 </div>
@@ -63,34 +64,38 @@
 
         <div class="modal-header">
             <h5 class="modal-title">Edit User Record</h5>
-            <button onclick="closeModal('editUserModal')" class="modal-close">&times;</button>
+            <button type="button" onclick="closeModal('editUserModal')" class="modal-close">&times;</button>
         </div>
 
         <div class="modal-body">
-            <form id="editUserForm">
+            <form id="editUserForm" method="POST">
+                @csrf
+                @method('PUT')
+
+                <input type="hidden" name="user_id" id="editUserId">
+
                 <div class="form-group">
                     <label class="form-label">Full Name</label>
-                    <input type="text" class="form-control" value="Ahmed Kamal">
+                    <input type="text" class="form-control" name="name" id="editUserName">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Email Address</label>
-                    <input type="email" class="form-control" value="ahmed@example.com">
+                    <input type="email" class="form-control" name="email" id="editUserEmail">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Role</label>
-                    <select class="form-control">
+                    <select class="form-control" name="role" id="editUserRole">
                         <option value="admin">Admin</option>
                         <option value="user">User</option>
-                        <option value="editor">Editor</option>
                     </select>
                 </div>
             </form>
         </div>
 
         <div class="modal-footer">
-            <button onclick="closeModal('editUserModal')" class="btn btn-outline">Cancel</button>
+            <button type="button" onclick="closeModal('editUserModal')" class="btn btn-outline">Cancel</button>
             <button type="submit" form="editUserForm" class="btn btn-primary">Save Changes</button>
         </div>
 
@@ -98,15 +103,38 @@
 </div>
 
 <script>
-    function openModal(modalId) {
-        document.getElementById(modalId).classList.add('active');
+    function openEditUserModal(button) {
+        const modal = document.getElementById('editUserModal');
+        const form = document.getElementById('editUserForm');
+
+        const idInput = document.getElementById('editUserId');
+        const nameInput = document.getElementById('editUserName');
+        const emailInput = document.getElementById('editUserEmail');
+        const roleSelect = document.getElementById('editUserRole');
+
+        const userId = button.dataset.id;
+        const userName = button.dataset.name;
+        const userEmail = button.dataset.email;
+        const userRole = button.dataset.role;
+
+
+        idInput.value = userId;
+        nameInput.value = userName;
+        emailInput.value = userEmail;
+        roleSelect.value = userRole;
+
+
+
+        const urlTemplate = "{{ route('dashboard.users.update', ['user' => 'USER_ID_PLACEHOLDER']) }}";
+        form.action = urlTemplate.replace('USER_ID_PLACEHOLDER', userId);
+
+        modal.classList.add('active');
     }
 
     function closeModal(modalId) {
         document.getElementById(modalId).classList.remove('active');
     }
 
-    // Optional: Close if clicking outside the window
     window.onclick = function(event) {
         if (event.target.classList.contains('modal-overlay')) {
             event.target.classList.remove('active');
