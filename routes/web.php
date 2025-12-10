@@ -26,4 +26,5 @@ Route::middleware(['auth', 'admin'])->prefix('dashboard')->name('dashboard.')->g
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     Route::get('/posts', [PostController::class, 'viewDashPosts'])->name('posts');
     Route::get('/categories', [CategoryController::class, 'viewCategories'])->name('categories');
+    Route::post('/categories', [CategoryController::class, 'createCategory'])->name('categories.post');
 });

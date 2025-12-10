@@ -18,40 +18,31 @@
                 </tr>
             </thead>
             <tbody>
+                @foreach($categories as $category)
                 <tr>
-                    <td><strong>Technology</strong></td>
-                    <td>/technology</td>
+                    <td><strong>{{ $category->name }}</strong></td>
+                    <td>/{{ $category->slug }}</td>
                     <td>12</td>
                     <td><a href="#" style="text-decoration: underline;">Edit</a></td>
                 </tr>
-                <tr>
-                    <td><strong>Design</strong></td>
-                    <td>/design</td>
-                    <td>8</td>
-                    <td><a href="#" style="text-decoration: underline;">Edit</a></td>
-                </tr>
-                <tr>
-                    <td><strong>Lifestyle</strong></td>
-                    <td>/lifestyle</td>
-                    <td>5</td>
-                    <td><a href="#" style="text-decoration: underline;">Edit</a></td>
-                </tr>
+                @endforeach
             </tbody>
         </table>
     </div>
 
     <div class="widget" style="height: fit-content;">
         <h3 class="widget-title">Add Category</h3>
-        <form action="#">
+        <form action="{{ route('dashboard.categories.post') }}" method="POST">
+            @csrf
             <div class="form-group">
                 <label class="form-label">Category Name</label>
-                <input type="text" class="form-control" placeholder="e.g. Health">
+                <input type="text" class="form-control" placeholder="e.g. Health" name="name">
             </div>
             <div class="form-group">
                 <label class="form-label">Slug (Optional)</label>
-                <input type="text" class="form-control" placeholder="e.g. health">
+                <input type="text" class="form-control" placeholder="e.g. health" name="slug">
             </div>
-            <button class="btn btn-primary btn-block">Save Category</button>
+            <button type="submit" class="btn btn-primary btn-block">Save Category</button>
         </form>
     </div>
 
