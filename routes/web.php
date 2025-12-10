@@ -23,6 +23,7 @@ Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth', 'admin'])->prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('/users', [UserController::class, 'viewUsers'])->name('users');
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     Route::get('/posts', [PostController::class, 'viewDashPosts'])->name('posts');
     Route::get('/categories', [CategoryController::class, 'viewCategories'])->name('categories');
 });

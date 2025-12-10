@@ -34,4 +34,13 @@ class UserController extends Controller
             ->route('dashboard.users')
             ->with('success', 'User updated successfully.');
     }
+
+    public function destroy(User $user)
+    {
+        $user->delete();
+
+        return redirect()
+            ->route('dashboard.users')
+            ->with('success', 'User deleted successfully.');
+    }
 }
