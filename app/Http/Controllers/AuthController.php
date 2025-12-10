@@ -19,11 +19,12 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
+            'is_admin' => false
         ]);
 
         auth()->login($user);
 
-        return redirect('home')->with('success', 'Account created!');
+        return redirect('/')->with('success', 'Account created!');
     }
 
     function login(Request $request)
@@ -35,7 +36,7 @@ class AuthController extends Controller
 
         if (auth()->attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect('home')->with('success', 'Logged in successfully!');
+            return redirect('/')->with('success', 'Logged in successfully!');
         }
 
         return back()->withErrors([
