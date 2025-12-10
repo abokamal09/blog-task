@@ -591,3 +591,261 @@ img {
     font-weight: 700;
     text-decoration: underline;
 }
+
+/* =========================================
+   11. DASHBOARD STYLES
+   ========================================= */
+
+/* Dashboard Grid: Sidebar + Content */
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 2rem;
+    min-height: 80vh;
+    padding: 2rem 0;
+}
+
+/* Dashboard Sidebar */
+.dash-sidebar {
+    border-right: 1px solid var(--border-color);
+    padding-right: 2rem;
+}
+
+.dash-nav-title {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.dash-nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.dash-nav-link {
+    display: block;
+    padding: 0.8rem 1rem;
+    border: 1px solid transparent;
+    color: var(--primary-color);
+    font-weight: 700;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.dash-nav-link:hover,
+.dash-nav-link.active {
+    background: #f1f5f9;
+    border-color: var(--border-color);
+    border-left: 4px solid var(--accent-color); /* Red marker */
+}
+
+/* Dashboard Stats Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    border-top: 4px solid var(--primary-color);
+}
+
+.stat-number {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1;
+}
+
+.stat-label {
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    margin-top: 0.5rem;
+}
+
+/* CLASSIC LEDGER TABLE */
+.table-responsive {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+}
+
+.ledger-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.ledger-table thead {
+    background-color: var(--primary-color); /* Navy Header */
+    color: #fff;
+}
+
+.ledger-table th,
+.ledger-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.ledger-table th {
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Action Buttons in Table */
+.btn-sm {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.75rem;
+    margin-right: 0.5rem;
+}
+
+.btn-danger {
+    background-color: #fff;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+}
+.btn-danger:hover {
+    background-color: var(--accent-color);
+    color: #fff;
+}
+
+/* Badges (e.g., Role: Admin) */
+.badge {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: 1px solid var(--border-color);
+    display: inline-block;
+}
+.badge-admin {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+.badge-user {
+    background: #fff;
+    color: #64748b;
+}
+
+@media (max-width: 900px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+    .dash-sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1rem;
+    }
+}
+
+/* =========================================
+   12. POP-UP MODAL (Classic Window)
+   ========================================= */
+
+/* The Background Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.6); /* Dark Navy dimming */
+    z-index: 2000;
+    display: none; /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+}
+
+/* The Active State (added via JS) */
+.modal-overlay.active {
+    display: flex;
+}
+
+/* The Window Box */
+.modal-window {
+    background: var(--bg-paper);
+    width: 100%;
+    max-width: 500px;
+    padding: 0; /* Padding handled inside sections */
+    border: 2px solid var(--primary-color); /* Thick Navy Border */
+    box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.2); /* Classic offset shadow */
+    position: relative;
+    animation: popIn 0.2s ease-out;
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Modal Header */
+.modal-header {
+    background: var(--primary-color);
+    color: #fff;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+    color: #fff;
+}
+
+/* Close 'X' Button */
+.modal-close {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: var(--accent-color); /* Red on hover */
+}
+
+/* Modal Body */
+.modal-body {
+    padding: 2rem 1.5rem;
+}
+
+/* Modal Footer */
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-body);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
