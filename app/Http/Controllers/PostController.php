@@ -12,6 +12,8 @@ class PostController extends Controller
     // Dashboard methods
     public function index()
     {
+        $this->authorize('viewAny', Post::class);
+
         $posts = Post::with(['user', 'category'])
             ->latest()
             ->paginate(10);
@@ -21,12 +23,16 @@ class PostController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Post::class);
+
         $categories = Category::all();
         return view("dashboard.posts.create", compact('categories'));
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', Post::class);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:500',
@@ -46,12 +52,16 @@ class PostController extends Controller
 
     public function edit(Post $post)
     {
+        $this->authorize('update', $post);
+
         $categories = Category::all();
         return view("dashboard.posts.edit", compact('post', 'categories'));
     }
 
     public function update(Request $request, Post $post)
     {
+        $this->authorize('update', $post);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:500',
@@ -69,6 +79,8 @@ class PostController extends Controller
 
     public function destroy(Post $post)
     {
+        $this->authorize('delete', $post);
+
         $post->delete();
 
         return redirect()->route('dashboard.posts')
@@ -79,9 +91,10 @@ class PostController extends Controller
     public function viewPost($slug)
     {
         $post = Post::where('slug', $slug)
-            ->where('status', 'published')
             ->with(['user', 'category'])
             ->firstOrFail();
+
+        $this->authorize('view', $post);
 
         return view("post", compact('post'));
     }

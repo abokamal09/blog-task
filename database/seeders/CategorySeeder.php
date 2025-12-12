@@ -13,14 +13,17 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Technology'],
-            ['name' => 'Design'],
-            ['name' => 'Coding'],
-            ['name' => 'Lifestyle'],
+            ['name' => 'Technology', 'slug' => 'technology'],
+            ['name' => 'Design', 'slug' => 'design'],
+            ['name' => 'Coding', 'slug' => 'coding'],
+            ['name' => 'Lifestyle', 'slug' => 'lifestyle'],
         ];
 
         foreach ($categories as $category) {
-            Category::create($category);
+            Category::firstOrCreate(
+                ['slug' => $category['slug']],
+                ['name' => $category['name']]
+            );
         }
 
         $this->command->info('Categories seeded successfully!');

@@ -35,7 +35,13 @@
     <aside class="sidebar">
 
         <div class="widget">
-            <input type="text" placeholder="Search posts..." class="search-input">
+            <form action="{{ route('home') }}" method="GET" class="search-form">
+                @if(request('category'))
+                <input type="hidden" name="category" value="{{ request('category') }}">
+                @endif
+                <input type="text" name="search" placeholder="Search posts..." class="search-input" value="{{ request('search') }}">
+                <button type="submit" style="display: none;"></button>
+            </form>
         </div>
 
         <div class="widget">

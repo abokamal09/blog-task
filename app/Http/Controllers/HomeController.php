@@ -14,6 +14,16 @@ class HomeController extends Controller
 
         $query = Post::published()->with(['user', 'category'])->latest();
 
+        // Filter by search query if provided
+        if ($request->has('search') && $request->search) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                    ->orWhere('content', 'like', "%{$searchTerm}%")
+                    ->orWhere('description', 'like', "%{$searchTerm}%");
+            });
+        }
+
         // Filter by category if provided
         if ($request->has('category')) {
             $category = Category::where('slug', $request->category)->first();

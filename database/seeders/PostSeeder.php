@@ -109,7 +109,10 @@ class PostSeeder extends Seeder
         ];
 
         foreach ($posts as $postData) {
-            Post::create($postData);
+            Post::firstOrCreate(
+                ['slug' => \Illuminate\Support\Str::slug($postData['title'])],
+                $postData
+            );
         }
 
         $this->command->info('Posts seeded successfully!');
