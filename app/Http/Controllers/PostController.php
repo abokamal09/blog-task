@@ -2,16 +2,87 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
+use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
-    function viewDashPosts()
+    // Dashboard methods
+    public function index()
     {
-        return view("dashboard.posts");
+        $posts = Post::with(['user', 'category'])
+            ->latest()
+            ->paginate(10);
+
+        return view("dashboard.posts.index", compact('posts'));
     }
-    function viewPost()
+
+    public function create()
     {
-        return view("post");
+        $categories = Category::all();
+        return view("dashboard.posts.create", compact('categories'));
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:500',
+            'content' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'image_url' => 'nullable|url',
+            'status' => 'required|in:draft,published',
+        ]);
+
+        $validated['user_id'] = Auth::id();
+
+        Post::create($validated);
+
+        return redirect()->route('dashboard.posts')
+            ->with('success', 'Post created successfully!');
+    }
+
+    public function edit(Post $post)
+    {
+        $categories = Category::all();
+        return view("dashboard.posts.edit", compact('post', 'categories'));
+    }
+
+    public function update(Request $request, Post $post)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:500',
+            'content' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'image_url' => 'nullable|url',
+            'status' => 'required|in:draft,published',
+        ]);
+
+        $post->update($validated);
+
+        return redirect()->route('dashboard.posts')
+            ->with('success', 'Post updated successfully!');
+    }
+
+    public function destroy(Post $post)
+    {
+        $post->delete();
+
+        return redirect()->route('dashboard.posts')
+            ->with('success', 'Post deleted successfully!');
+    }
+
+    // Frontend methods
+    public function viewPost($slug)
+    {
+        $post = Post::where('slug', $slug)
+            ->where('status', 'published')
+            ->with(['user', 'category'])
+            ->firstOrFail();
+
+        return view("post", compact('post'));
     }
 }
