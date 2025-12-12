@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+
+    
+    <script type="module" src="http://[::1]:5174/@vite/client"></script><link rel="stylesheet" href="http://[::1]:5174/resources/css/app.css" /><script type="module" src="http://[::1]:5174/resources/js/app.js"></script><script id="browser-logger-active">
+(function() {
+    const ENDPOINT = 'http://127.0.0.1:8000/_boost/browser-logs';
+    const logQueue = [];
+    let flushTimeout = null;
+
+    console.log('🔍 Browser logger active (MCP server detected). Posting to: ' + ENDPOINT);
+
+    // Store original console methods
+    const originalConsole = {
+        log: console.log,
+        info: console.info,
+        error: console.error,
+        warn: console.warn,
+        table: console.table
+    };
+
+    // Helper to safely stringify values
+    function safeStringify(obj) {
+        const seen = new WeakSet();
+        return JSON.stringify(obj, (key, value) => {
+            if (typeof value === 'object' && value !== null) {
+                if (seen.has(value)) return '[Circular]';
+                seen.add(value);
+            }
+            if (value instanceof Error) {
+                return {
+                    name: value.name,
+                    message: value.message,
+                    stack: value.stack
+                };
+            }
+            return value;
+        });
+    }
+
+    // Batch and send logs
+    function flushLogs() {
+        if (logQueue.length === 0) return;
+
+        const batch = logQueue.splice(0, logQueue.length);
+
+        fetch(ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ logs: batch })
+        }).catch(err => {
+            // Silently fail to avoid infinite loops
+            originalConsole.error('Failed to send logs:', err);
+        });
+    }
+
+    // Debounced flush (100ms)
+    function scheduleFlush() {
+        if (flushTimeout) clearTimeout(flushTimeout);
+        flushTimeout = setTimeout(flushLogs, 100);
+    }
+
+    // Intercept console methods
+    ['log', 'info', 'error', 'warn', 'table'].forEach(method => {
+        console[method] = function(...args) {
+            // Call original method
+            originalConsole[method].apply(console, args);
+
+            // Capture log data
+            try {
+                logQueue.push({
+                    type: method,
+                    timestamp: new Date().toISOString(),
+                    data: args.map(arg => {
+                        try {
+                            return typeof arg === 'object' ? JSON.parse(safeStringify(arg)) : arg;
+                        } catch (e) {
+                            return String(arg);
+                        }
+                    }),
+                    url: window.location.href,
+                    userAgent: navigator.userAgent
+                });
+
+                scheduleFlush();
+            } catch (e) {
+                // Fail silently
+            }
+        };
+    });
+
+    // Global error handlers for uncaught errors
+    const originalOnError = window.onerror;
+    window.onerror = function boostErrorHandler(errorMsg, url, lineNumber, colNumber, error) {
+        try {
+            logQueue.push({
+                type: 'uncaught_error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: errorMsg,
+                    filename: url,
+                    lineno: lineNumber,
+                    colno: colNumber,
+                    error: error ? {
+                        name: error.name,
+                        message: error.message,
+                        stack: error.stack
+                    } : null
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Call original handler if it exists
+        if (originalOnError && typeof originalOnError === 'function') {
+            return originalOnError(errorMsg, url, lineNumber, colNumber, error);
+        }
+
+        // Let the error continue to propagate
+        return false;
+    }
+    window.addEventListener('error', (event) => {
+        try {
+            logQueue.push({
+                type: 'window_error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: event.message,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    error: event.error ? {
+                        name: event.error.name,
+                        message: event.error.message,
+                        stack: event.error.stack
+                    } : null
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the error continue to propagate
+        return false;
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+        try {
+            logQueue.push({
+                type: 'error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: 'Unhandled Promise Rejection',
+                    reason: event.reason instanceof Error ? {
+                        name: event.reason.name,
+                        message: event.reason.message,
+                        stack: event.reason.stack
+                    } : event.reason
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the rejection continue to propagate
+        return false;
+    });
+
+    // Flush on page unload
+    window.addEventListener('beforeunload', () => {
+        if (logQueue.length > 0) {
+            navigator.sendBeacon(ENDPOINT, JSON.stringify({ logs: logQueue }));
+        }
+    });
+})();
+</script>
+</head>
+
+<body>
+
+    <header class="navbar">
+    <div class="nav-container">
+        <a href="/" class="logo">LOGO</a>
+
+        
+
+                <div class="nav-links">
+            <a href="/login" class="btn btn-outline">Log In</a>
+            <a href="/register" class="btn btn-primary">Register</a>
+        </div>
+            </div>
+</header>
+    <!-- DEBUG: Posts count = 6, Total = 6 -->
+<div class="container main-wrapper">
+
+    <main class="posts-column">
+        <div class="posts-grid">
+                        <article class="post-card">
+                <img src="https://placehold.co/800x450/e2e8f0/64748b?text=CSS+Grid" alt="The Future of CSS Grid" class="post-img">
+                <div class="post-body">
+                    <div class="post-meta">Dec 12, 2025 • Technology</div>
+                    <h2 class="post-title"><a href="http://127.0.0.1:8000/post/the-future-of-css-grid">The Future of CSS Grid</a></h2>
+                    <p class="post-excerpt">How modern layout techniques are changing the way we build the web...</p>
+                    <a href="http://127.0.0.1:8000/post/the-future-of-css-grid" class="read-more">Read Article →</a>
+                </div>
+            </article>
+                        <article class="post-card">
+                <img src="https://placehold.co/800x450/cbd5e1/64748b?text=Minimalism" alt="Minimalism in 2024" class="post-img">
+                <div class="post-body">
+                    <div class="post-meta">Dec 12, 2025 • Design</div>
+                    <h2 class="post-title"><a href="http://127.0.0.1:8000/post/minimalism-in-2024">Minimalism in 2024</a></h2>
+                    <p class="post-excerpt">Why whitespace is your best friend when designing complex interfaces.</p>
+                    <a href="http://127.0.0.1:8000/post/minimalism-in-2024" class="read-more">Read Article →</a>
+                </div>
+            </article>
+                        <article class="post-card">
+                <img src="https://placehold.co/800x450/94a3b8/ffffff?text=Laravel" alt="Mastering Laravel Blade" class="post-img">
+                <div class="post-body">
+                    <div class="post-meta">Dec 12, 2025 • Coding</div>
+                    <h2 class="post-title"><a href="http://127.0.0.1:8000/post/mastering-laravel-blade">Mastering Laravel Blade</a></h2>
+                    <p class="post-excerpt">Tips and tricks to keep your templates clean and maintainable.</p>
+                    <a href="http://127.0.0.1:8000/post/mastering-laravel-blade" class="read-more">Read Article →</a>
+                </div>
+            </article>
+                        <article class="post-card">
+                <img src="https://placehold.co/800x450/475569/ffffff?text=Remote+Work" alt="Remote Work Balance" class="post-img">
+                <div class="post-body">
+                    <div class="post-meta">Dec 12, 2025 • Lifestyle</div>
+                    <h2 class="post-title"><a href="http://127.0.0.1:8000/post/remote-work-balance">Remote Work Balance</a></h2>
+                    <p class="post-excerpt">Finding the sweet spot between productivity and mental health.</p>
+                    <a href="http://127.0.0.1:8000/post/remote-work-balance" class="read-more">Read Article →</a>
+                </div>
+            </article>
+                        <article class="post-card">
+                <img src="https://placehold.co/800x450/f1f5f9/64748b?text=Laravel+11" alt="Draft: Laravel 11 Features" class="post-img">
+                <div class="post-body">
+                    <div class="post-meta">Dec 12, 2025 • Coding</div>
+                    <h2 class="post-title"><a href="http://127.0.0.1:8000/post/draft-laravel-11-features">Draft: Laravel 11 Features</a></h2>
+                    <p class="post-excerpt">Exploring the exciting new features coming in Laravel 11.</p>
+                    <a href="http://127.0.0.1:8000/post/draft-laravel-11-features" class="read-more">Read Article →</a>
+                </div>
+            </article>
+                        <article class="post-card">
+                <img src="https://placehold.co/800x450/dbeafe/3b82f6?text=TypeScript" alt="Understanding TypeScript Generics" class="post-img">
+                <div class="post-body">
+                    <div class="post-meta">Dec 12, 2025 • Technology</div>
+                    <h2 class="post-title"><a href="http://127.0.0.1:8000/post/understanding-typescript-generics">Understanding TypeScript Generics</a></h2>
+                    <p class="post-excerpt">A deep dive into one of TypeScript&#039;s most powerful features.</p>
+                    <a href="http://127.0.0.1:8000/post/understanding-typescript-generics" class="read-more">Read Article →</a>
+                </div>
+            </article>
+                    </div>
+
+            </main>
+
+    <aside class="sidebar">
+
+        <div class="widget">
+            <input type="text" placeholder="Search posts..." class="search-input">
+        </div>
+
+        <div class="widget">
+            <h3 class="widget-title">Categories</h3>
+            <div class="tags-cloud">
+                                <a href="http://127.0.0.1:8000?category=technology" class="tag">Technology</a>
+                                <a href="http://127.0.0.1:8000?category=design" class="tag">Design</a>
+                                <a href="http://127.0.0.1:8000?category=coding" class="tag">Coding</a>
+                                <a href="http://127.0.0.1:8000?category=lifestyle" class="tag">Lifestyle</a>
+                            </div>
+        </div>
+
+    </aside>
+
+</div>
+
+</body>
+
+</html>
