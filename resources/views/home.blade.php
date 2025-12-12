@@ -62,12 +62,9 @@
         <div class="widget">
             <h3 class="widget-title">Categories</h3>
             <div class="tags-cloud">
-                <a href="#" class="tag">Technology</a>
-                <a href="#" class="tag">Design</a>
-                <a href="#" class="tag">Laravel</a>
-                <a href="#" class="tag">Lifestyle</a>
-                <a href="#" class="tag">UI/UX</a>
-                <a href="#" class="tag">Business</a>
+                @foreach($categories as $category)
+                <a href="{{ $category->slug }}" class="tag">{{ $category->name }}</a>
+                @endforeach
             </div>
         </div>
 

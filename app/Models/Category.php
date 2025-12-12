@@ -9,7 +9,6 @@ class Category extends Model
 {
     protected $fillable = [
         'name',
-        'description',
         'slug'
     ];
 
@@ -20,5 +19,10 @@ class Category extends Model
         if (!isset($this->attributes['slug']) || empty($this->attributes['slug'])) {
             $this->attributes['slug'] = Str::slug($value);
         }
+    }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
     }
 }

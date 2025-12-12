@@ -7,9 +7,6 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
 
 Route::get('/', [HomeController::class, 'viewHome'])->name('home');
 Route::get('/post/{id}', [PostController::class, 'viewPost'])->name('post');
@@ -27,4 +24,6 @@ Route::middleware(['auth', 'admin'])->prefix('dashboard')->name('dashboard.')->g
     Route::get('/posts', [PostController::class, 'viewDashPosts'])->name('posts');
     Route::get('/categories', [CategoryController::class, 'viewCategories'])->name('categories');
     Route::post('/categories', [CategoryController::class, 'createCategory'])->name('categories.post');
+    Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 });
